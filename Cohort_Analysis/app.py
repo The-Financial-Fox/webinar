@@ -110,16 +110,12 @@ if uploaded_file:
             title = slide.shapes.title
             title.text = "SaaS Cohort Retention Analysis"
             
-            # Add insights to slides
             for insight in ai_commentary.split('\n'):
                 slide = prs.slides.add_slide(slide_layout)
-                slide.shapes.title.text = insight
-                
-            # Save PowerPoint file
+                slide.shapes.title.text = insight.strip()
+            
             ppt_filename = "Cohort_Analysis_Report.pptx"
             prs.save(ppt_filename)
             
             with open(ppt_filename, "rb") as f:
                 st.download_button("📥 Download PowerPoint Report", f, file_name=ppt_filename)
-    
-    st.success("🎯 AI insights, CFO email, and PowerPoint report generation ready!")
