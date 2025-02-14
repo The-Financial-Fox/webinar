@@ -104,18 +104,23 @@ if uploaded_file:
         
         # Generate PowerPoint Report
         if st.button("📊 Generate PowerPoint Report"):
-            prs = Presentation()
-            slide_layout = prs.slide_layouts[5]
-            slide = prs.slides.add_slide(slide_layout)
-            title = slide.shapes.title
-            title.text = "SaaS Cohort Retention Analysis"
-            
-            for insight in ai_commentary.split('\n'):
+            try:
+                prs = Presentation()
+                slide_layout = prs.slide_layouts[5]
                 slide = prs.slides.add_slide(slide_layout)
-                slide.shapes.title.text = insight.strip()
-            
-            ppt_filename = "Cohort_Analysis_Report.pptx"
-            prs.save(ppt_filename)
-            
-            with open(ppt_filename, "rb") as f:
-                st.download_button("📥 Download PowerPoint Report", f, file_name=ppt_filename)
+                title = slide.shapes.title
+                title.text = "SaaS Cohort Retention Analysis"
+                
+                for insight in ai_commentary.split('\n'):
+                    slide = prs.slides.add_slide(slide_layout)
+                    text_box = slide.shapes.add_textbox(Inches(1), Inches(1), Inches(8), Inches(5))
+                    text_frame = text_box.text_frame
+                    text_frame.text = insight.strip()
+                
+                ppt_filename = "Cohort_Analysis_Report.pptx"
+                prs.save(ppt_filename)
+                
+                with open(ppt_filename, "rb") as f:
+                    st.download_button("📥 Download PowerPoint Report", f, file_name=ppt_filename)
+            except Exception as e:
+                st.error(f"Error generating PowerPoint: {e}")
