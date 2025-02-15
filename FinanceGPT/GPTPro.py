@@ -14,7 +14,7 @@ if not GROQ_API_KEY:
     st.stop()
 
 # **🎨 Streamlit UI Styling**
-st.set_page_config(page_title="Finance GPT", page_icon="💰", layout="wide")
+st.set_page_config(page_title="Finance GPT Pro by Christian Martinez", page_icon="💰", layout="wide")
 
 st.markdown("""
     <style>
@@ -28,7 +28,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # **📢 Title & Description**
-st.markdown('<h1 class="title">💰 Finance GPT</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="title">💰 Finance GPT Pro by Christian Martinez</h1>', unsafe_allow_html=True)
 st.markdown('<p class="subtitle">Your AI-powered financial assistant for all things finance, FP&A, and investing.</p>', unsafe_allow_html=True)
 
 # **📂 PDF Upload**
