@@ -52,7 +52,7 @@ model_options = [
     "gemma2-9b-it",
     "llama-3.3-70b-versatile",
     "mixtral-8x7b-32768",
-    "whisper-large-v3-turbo",
+    "llama-3.1-8b-instant",
     "llama3-8b-8192"
 ]
 selected_model = st.selectbox("Choose the model to process your query:", model_options)
