@@ -4,6 +4,10 @@ import pandas as pd
 from groq import Groq
 from dotenv import load_dotenv
 import PyPDF2
+import warnings
+
+# Suppress unnecessary Streamlit warnings
+warnings.filterwarnings("ignore")
 
 # Load API key securely
 load_dotenv()
@@ -13,21 +17,15 @@ if not GROQ_API_KEY:
     st.error("🚨 API Key is missing! Set it in Streamlit Secrets or a .env file.")
     st.stop()
 
+# Ensure 'openpyxl' is installed for reading Excel files
+try:
+    import openpyxl
+except ImportError:
+    st.error("🚨 Missing optional dependency 'openpyxl'. Install it using: pip install openpyxl")
+    st.stop()
+
 # **🎨 Streamlit UI Styling**
 st.set_page_config(page_title="Finance GPT", page_icon="💰", layout="wide")
-
-st.markdown("""
-    <style>
-        .title { text-align: center; font-size: 36px; font-weight: bold; color: #004D99; }
-        .subtitle { text-align: center; font-size: 20px; color: #007ACC; }
-        .stButton>button { width: 100%; background-color: #004D99; color: white; font-size: 16px; font-weight: bold; }
-        .chat-container { padding: 15px; border-radius: 10px; margin: 10px 0; background-color: #F0F8FF; }
-    </style>
-""", unsafe_allow_html=True)
-
-# **📢 Title & Description**
-st.markdown('<h1 class="title">💰 Finance GPT</h1>', unsafe_allow_html=True)
-st.markdown('<p class="subtitle">Your AI-powered financial assistant for all things finance, FP&A, and investing.</p>', unsafe_allow_html=True)
 
 # **📂 File Uploads (PDF & Excel)**
 st.subheader("📥 Upload Financial Documents (PDF or Excel)")
@@ -42,11 +40,12 @@ for uploaded_file in uploaded_files:
         for page in pdf_reader.pages:
             combined_text += page.extract_text() or ""
     elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-        excel_data = pd.ExcelFile(uploaded_file)
+        excel_data = pd.ExcelFile(uploaded_file, engine='openpyxl')
         for sheet_name in excel_data.sheet_names:
             excel_sheets[sheet_name] = excel_data.parse(sheet_name)
 
-st.success("✅ Files Uploaded & Processed Successfully!") if uploaded_files else None
+if uploaded_files:
+    st.success("✅ Files Uploaded & Processed Successfully!")
 
 # **Model Selection Dropdown**
 st.subheader("🤖 Select AI Model")
@@ -59,7 +58,7 @@ user_input = st.text_area("🔍 Type your finance-related question here...")
 
 if st.button("🚀 Get Answer"):
     client = Groq(api_key=GROQ_API_KEY)
-
+    
     excel_summary = "\n\n".join([f"Sheet: {name}\n{df.head().to_string()}" for name, df in excel_sheets.items()])
     
     prompt = f"""
