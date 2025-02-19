@@ -59,24 +59,14 @@ if uploaded_file:
         response = client.chat.completions.create(
             messages=[
                 {"role": "system", "content": "You are an AI-powered FP&A analyst providing concise financial insights."},
-                {"role": "user", "content": "Analyze retention trends, product impact, churn outliers, and revenue implications."}
+                {"role": "user", "content": "Analyze retention trends, product impact, churn outliers, and revenue implications. Give 3 separate concise insights"}
             ],
             model="llama3-8b-8192",
         )
         ai_commentary = response.choices[0].message.content
         insights = ai_commentary.split("**Insight")
 
-        def generate_graph():
-            fig, ax = plt.subplots(figsize=(6, 3))
-            sns.lineplot(data=retention_rate.T, dashes=False, ax=ax)
-            ax.set_title("Retention Trends Over Time", fontsize=10)
-            plt.xticks(fontsize=8)
-            plt.yticks(fontsize=8)
-            plt.tight_layout()
-            buffer = BytesIO()
-            fig.savefig(buffer, format='png', dpi=150)
-            buffer.seek(0)
-            return buffer
+     
 
         def create_pptx(heatmap_img, insights_list):
             prs = Presentation()
