@@ -47,16 +47,16 @@ for uploaded_file in uploaded_files:
 if uploaded_files:
     st.success("✅ Files Uploaded & Processed Successfully!")
 
-# **Model Selection Dropdown**
-st.subheader("🤖 Select AI Model")
+# **Multi-Model Selection**
+st.subheader("🤖 Select AI Models (Pick up to 3)")
 model_options = ["gemma2-9b-it", "llama-3.3-70b-versatile", "mixtral-8x7b-32768", "whisper-large-v3-turbo", "llama3-8b-8192"]
-selected_model = st.selectbox("Choose the model to process your query:", model_options)
+selected_models = st.multiselect("Choose up to 3 models to process your query:", model_options, default=model_options[:3])
 
 # **Chat Input**
 st.subheader("💬 Ask a Finance Question")
 user_input = st.text_area("🔍 Type your finance-related question here...")
 
-if st.button("🚀 Get Answer"):
+if st.button("🚀 Get Answer") and selected_models:
     client = Groq(api_key=GROQ_API_KEY)
     
     excel_summary = "\n\n".join([f"Sheet: {name}\n{df.head().to_string()}" for name, df in excel_sheets.items()])
@@ -71,16 +71,21 @@ if st.button("🚀 Get Answer"):
     {excel_summary}
     """
 
-    response = client.chat.completions.create(
-        messages=[
-            {"role": "system", "content": "You are an AI expert in finance and financial planning & analysis (FP&A)."},
-            {"role": "user", "content": prompt}
-        ],
-        model=selected_model,
-    )
-
-    ai_response = response.choices[0].message.content
+    # **Query each model in parallel**
+    responses = {}
+    for model in selected_models:
+        response = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": "You are an AI expert in finance and financial planning & analysis (FP&A)."},
+                {"role": "user", "content": prompt}
+            ],
+            model=model,
+        )
+        responses[model] = response.choices[0].message.content
     
-    # **Display AI Response**
-    st.subheader("💡 Finance GPT Answer")
-    st.write(ai_response)
+    # **Display AI Responses for Each Model**
+    st.subheader("💡 Finance GPT Answers")
+    for model, ai_response in responses.items():
+        with st.expander(f"📌 {model} Response"):
+            st.write(ai_response)
+
