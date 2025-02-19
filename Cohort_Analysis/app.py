@@ -58,7 +58,7 @@ if uploaded_file:
         client = Groq(api_key=GROQ_API_KEY)
         response = client.chat.completions.create(
             messages=[
-                {"role": "system", "content": "You are an AI-powered FP&A analyst providing deep financial insights."},
+                {"role": "system", "content": "You are an AI-powered FP&A analyst providing concise financial insights."},
                 {"role": "user", "content": "Analyze retention trends, product impact, churn outliers, and revenue implications."}
             ],
             model="llama3-8b-8192",
