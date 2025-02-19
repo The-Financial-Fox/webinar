@@ -7,7 +7,8 @@ from groq import Groq
 from dotenv import load_dotenv
 from operator import attrgetter
 from pptx import Presentation
-from pptx.util import Inches
+from pptx.util import Inches, Pt
+from pptx.enum.text import PP_ALIGN
 from io import BytesIO
 
 # Load API key securely
@@ -41,14 +42,12 @@ if uploaded_file:
     # Identify outliers (clients who left all in one month)
     extreme_churn = sales_data.groupby(['PurchaseMonth'])['Customer_ID'].nunique()
     churn_outliers = extreme_churn[extreme_churn > (extreme_churn.mean() + 2 * extreme_churn.std())]
-    
+
     # Plot retention rate heatmap and save to a buffer
     st.subheader("🔥 Retention Rate Heatmap")
     fig, ax = plt.subplots(figsize=(16, 9))
     sns.heatmap(retention_rate, annot=True, fmt=".0%", cmap="YlGnBu", linewidths=0.5, ax=ax)
     ax.set_title('Cohort Analysis - Retention Rate', fontsize=16)
-    ax.set_xlabel('Months Since First Purchase', fontsize=12)
-    ax.set_ylabel('Cohort Month', fontsize=12)
     plt.tight_layout()
     st.pyplot(fig)
     
@@ -58,14 +57,6 @@ if uploaded_file:
     heatmap_buffer.seek(0)
 
     # AI Insights
-    cohort_summary = f"""
-    **Cohort Analysis Summary**:
-    - Number of Cohorts: {len(cohort_counts)}
-    - Retention Rate Breakdown:
-    {retention_rate.to_string()}
-    - Churn Outliers: {churn_outliers.to_string() if not churn_outliers.empty else 'No extreme churn detected.'}
-    """
-    
     st.subheader("🤖 AI Agent - FP&A Commentary")
     if st.button("🚀 Generate AI Commentary"):
         client = Groq(api_key=GROQ_API_KEY)
@@ -77,23 +68,7 @@ if uploaded_file:
                 },
                 {
                     "role": "user",
-                    "content": f"""
-                        **Insight 1: Cohort Behavior & Retention Trends:** 
-                        - Identify the distinct cohorts based on customer acquisition periods.
-                        - Analyze retention trends across cohorts and highlight any unexpected patterns (e.g., sudden drops, consistent loyalty, or anomalies in renewal rates).
-
-                        **Insight 2: Product-Level Retention & Revenue Impact:**  
-                        - Determine which product has the highest and lowest retention rates and explain why.
-                        - Evaluate the revenue impact of retention per product.
-                        - Identify any upgrade/downgrade behaviors affecting retention and revenue.
-
-                        **Insight 3: Extreme Churn & Outlier Detection:**  
-                        - Detect customers with unusual churn patterns.
-                        - Identify any customer segments that contribute to unexpected churn.
-                        - Highlight extreme cases where pricing anomalies impact revenue patterns.
-
-                        {cohort_summary}
-                    """
+                    "content": "Analyze retention trends, product impact, churn outliers, and revenue implications."
                 }
             ],
             model="llama3-8b-8192",
@@ -102,6 +77,18 @@ if uploaded_file:
         
         # Split insights into sections for PowerPoint
         insights = ai_commentary.split("**Insight")
+
+        # Function to create a graph for each insight
+        def generate_graph():
+            fig, ax = plt.subplots(figsize=(8, 4))
+            sns.lineplot(data=retention_rate.T, dashes=False, ax=ax)
+            ax.set_title("Retention Trends Over Time")
+            plt.tight_layout()
+            
+            buffer = BytesIO()
+            fig.savefig(buffer, format='png', dpi=200)
+            buffer.seek(0)
+            return buffer
 
         # PowerPoint Export Function
         def create_pptx(heatmap_img, insights_list):
@@ -121,13 +108,25 @@ if uploaded_file:
                 f.write(heatmap_img.read())
             slide.shapes.add_picture(img_path, Inches(1), Inches(1.5), Inches(8))
 
-            # Add each insight on a separate slide
+            # Add each insight on a separate slide with a graph
             for insight in insights_list:
                 slide = prs.slides.add_slide(prs.slide_layouts[5])
                 slide.shapes.title.text = "AI Insight"
-                text_box = slide.shapes.add_textbox(Inches(1), Inches(1.5), Inches(8), Inches(5))
+
+                # Add text box for insights
+                text_box = slide.shapes.add_textbox(Inches(0.5), Inches(1), Inches(5), Inches(5))
                 text_frame = text_box.text_frame
                 text_frame.text = insight.strip()
+                for p in text_frame.paragraphs:
+                    p.space_after = Pt(5)
+                    p.alignment = PP_ALIGN.LEFT
+
+                # Add insight graph
+                graph_img = generate_graph()
+                graph_path = "graph.png"
+                with open(graph_path, "wb") as f:
+                    f.write(graph_img.read())
+                slide.shapes.add_picture(graph_path, Inches(5.5), Inches(1), Inches(4))
 
             # Save the PowerPoint file
             ppt_buffer = BytesIO()
