@@ -53,7 +53,7 @@ if uploaded_files:
 # **Model Selection (Multi-Select for 3 models)**
 st.subheader("🤖 Select AI Models")
 model_options = [
-    "llama3-70b-8192", 
+    "gemma2-9b-it", 
     "llama-3.3-70b-versatile", 
     "mixtral-8x7b-32768", 
     "whisper-large-v3-turbo", 
@@ -112,3 +112,36 @@ if st.button("🚀 Get Answer"):
         with col:
             st.markdown(f"### {model}")
             st.write(responses[model])
+    
+    # **Best Answer Evaluation**
+    st.markdown("---")
+    st.subheader("🏆 Best Answer Evaluation")
+    evaluation_prompt = f"""
+    I received the following responses from three AI models for the finance question:
+    {user_input}
+    
+    Model {selected_models[0]}:
+    {responses[selected_models[0]]}
+    
+    Model {selected_models[1]}:
+    {responses[selected_models[1]]}
+    
+    Model {selected_models[2]}:
+    {responses[selected_models[2]]}
+    
+    As an AI expert in finance and FP&A, please evaluate these responses and decide which one is the best, explaining why you chose that answer.
+    """
+    
+    try:
+        # Here we use the first selected model to perform the evaluation.
+        evaluation_response = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": "You are an AI expert in finance and financial planning & analysis (FP&A)."},
+                {"role": "user", "content": evaluation_prompt}
+            ],
+            model=selected_models[0],
+        )
+        best_answer = evaluation_response.choices[0].message.content
+        st.write(best_answer)
+    except Exception as e:
+        st.error(f"Error during evaluation: {e}")
