@@ -53,7 +53,7 @@ if uploaded_files:
 # **Model Selection (Multi-Select for 3 models)**
 st.subheader("🤖 Select AI Models")
 model_options = [
-    "gemma2-9b-it", 
+    "llama3-70b-8192", 
     "llama-3.3-70b-versatile", 
     "mixtral-8x7b-32768", 
     "whisper-large-v3-turbo", 
