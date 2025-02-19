@@ -71,13 +71,30 @@ if uploaded_file:
         client = Groq(api_key=GROQ_API_KEY)
         response = client.chat.completions.create(
             messages=[
-                {"role": "system", "content": "You are an AI-powered FP&A analyst providing financial insights."},
-                {"role": "user", "content": f"""
-                    **Insight 1: Analysis Period:** Identify the cohort period being analyzed.
-                    **Insight 2: Product Retention:** Identify which product has the highest and lowest retention.
-                    **Insight 3: Outlier Analysis:** Detect extreme churn patterns.
-                    {cohort_summary}
-                """}
+                {
+                    "role": "system",
+                    "content": "You are an AI-powered FP&A analyst providing deep financial insights, identifying key trends, anomalies, and actionable recommendations from cohort analysis data."
+                },
+                {
+                    "role": "user",
+                    "content": f"""
+                        **Insight 1: Cohort Behavior & Retention Trends:** 
+                        - Identify the distinct cohorts based on customer acquisition periods.
+                        - Analyze retention trends across cohorts and highlight any unexpected patterns (e.g., sudden drops, consistent loyalty, or anomalies in renewal rates).
+
+                        **Insight 2: Product-Level Retention & Revenue Impact:**  
+                        - Determine which product has the highest and lowest retention rates and explain why.
+                        - Evaluate the revenue impact of retention per product (i.e., do customers who retain longer contribute disproportionately to revenue?).
+                        - Identify any upgrade/downgrade behaviors between products that affect retention and revenue.
+
+                        **Insight 3: Extreme Churn & Outlier Detection:**  
+                        - Detect customers with unusual churn patterns (e.g., large early drop-offs, reactivations, or one-time high spenders who disappear).
+                        - Identify any customer segments (by product, cohort, or purchase behavior) that contribute to unexpected churn.
+                        - Highlight any extreme cases where pricing anomalies (e.g., extreme discounts or bulk purchases) impact overall revenue patterns.
+
+                        {cohort_summary}
+                    """
+                }
             ],
             model="llama3-8b-8192",
         )
