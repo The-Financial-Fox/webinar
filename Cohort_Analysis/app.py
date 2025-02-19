@@ -80,13 +80,15 @@ if uploaded_file:
 
         # Function to create a graph for each insight
         def generate_graph():
-            fig, ax = plt.subplots(figsize=(8, 4))
+            fig, ax = plt.subplots(figsize=(6, 3))
             sns.lineplot(data=retention_rate.T, dashes=False, ax=ax)
-            ax.set_title("Retention Trends Over Time")
+            ax.set_title("Retention Trends Over Time", fontsize=10)
+            plt.xticks(fontsize=8)
+            plt.yticks(fontsize=8)
             plt.tight_layout()
             
             buffer = BytesIO()
-            fig.savefig(buffer, format='png', dpi=200)
+            fig.savefig(buffer, format='png', dpi=150)
             buffer.seek(0)
             return buffer
 
@@ -116,9 +118,11 @@ if uploaded_file:
                 # Add text box for insights
                 text_box = slide.shapes.add_textbox(Inches(0.5), Inches(1), Inches(5), Inches(5))
                 text_frame = text_box.text_frame
+                text_frame.word_wrap = True
                 text_frame.text = insight.strip()
                 for p in text_frame.paragraphs:
-                    p.space_after = Pt(5)
+                    p.space_after = Pt(3)
+                    p.font.size = Pt(14)  # Small font to fit more text
                     p.alignment = PP_ALIGN.LEFT
 
                 # Add insight graph
@@ -126,7 +130,7 @@ if uploaded_file:
                 graph_path = "graph.png"
                 with open(graph_path, "wb") as f:
                     f.write(graph_img.read())
-                slide.shapes.add_picture(graph_path, Inches(5.5), Inches(1), Inches(4))
+                slide.shapes.add_picture(graph_path, Inches(5.5), Inches(1), Inches(3))
 
             # Save the PowerPoint file
             ppt_buffer = BytesIO()
