@@ -71,7 +71,7 @@ if uploaded_file:
                     "content": "Analyze retention trends, product impact, churn outliers, and revenue implications."
                 }
             ],
-            model="llama3-8b-8192",
+            model="llama-3.3-70b-versatile",
         )
         ai_commentary = response.choices[0].message.content
         
