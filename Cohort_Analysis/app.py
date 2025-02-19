@@ -97,10 +97,6 @@ if uploaded_file:
                 p.space_after = Pt(3)
                 p.font.size = Pt(14)
                 p.alignment = PP_ALIGN.LEFT
-                graph_img = generate_graph()
-                graph_stream = BytesIO(graph_img.getvalue())
-                slide.shapes.add_picture(graph_stream, Inches(5.5), Inches(1), Inches(3))
-            
             ppt_buffer = BytesIO()
             prs.save(ppt_buffer)
             ppt_buffer.seek(0)
