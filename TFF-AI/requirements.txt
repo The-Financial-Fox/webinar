@@ -1,7 +1,8 @@
 streamlit
 pandas
 plotly
-groq
-python-dotenv
 statsmodels
+prophet
+fpdf
 openpyxl
+python-dotenv
