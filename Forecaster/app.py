@@ -70,7 +70,7 @@ if uploaded_file:
             {"role": "system", "content": "You are an expert in financial forecasting."},
             {"role": "user", "content": prompt}
         ],
-        model="llama3-8b-8192",
+        model="llama-3.3-70b-versatile",
     )
     
     ai_analysis = response.choices[0].message.content
