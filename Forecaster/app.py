@@ -64,7 +64,7 @@ if uploaded_file:
         st.subheader("🤖 AI-Generated Forecast Analysis")
         client = Groq(api_key=GROQ_API_KEY)
         prompt = f"""
-        You are a Financial Analyst. Analyze the {target_column} forecast trends and provide:
+        You are a Financial Analyst. Analyze the forecast trends and provide:
         - Key insights from the forecast.
         - Potential risks and opportunities.
         - Strategic recommendations based on the trend.
@@ -78,7 +78,7 @@ if uploaded_file:
                 {"role": "system", "content": "You are an expert in financial forecasting."},
                 {"role": "user", "content": prompt}
             ],
-            model="llama-3.3-70b-versatile",
+            model="llama-3.1-8b-instant",
         )
         
         ai_analysis = response.choices[0].message.content
