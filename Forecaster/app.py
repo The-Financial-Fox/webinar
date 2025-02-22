@@ -60,17 +60,21 @@ if uploaded_file:
         ax.legend()
         st.pyplot(fig)
         
-        # Generate AI Commentary
+        # Generate AI Commentary with reduced data size
         st.subheader("🤖 AI-Generated Forecast Analysis")
         client = Groq(api_key=GROQ_API_KEY)
+        
+        # Reduce request size by summarizing forecast data
+        sample_forecast = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(10).to_json()
+        
         prompt = f"""
-        You are a Financial Analyst. Analyze the forecast trends and provide:
+        You are a Financial Analyst. Analyze the {target_column} forecast trends and provide:
         - Key insights from the forecast.
         - Potential risks and opportunities.
         - Strategic recommendations based on the trend.
         
-        Here is the forecast data:
-        {forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].to_json()}
+        Here is a sample of the forecast data:
+        {sample_forecast}
         """
         
         response = client.chat.completions.create(
@@ -78,7 +82,7 @@ if uploaded_file:
                 {"role": "system", "content": "You are an expert in financial forecasting."},
                 {"role": "user", "content": prompt}
             ],
-            model="mixtral-8x7b-32768",
+            model="llama3-8b-8192",
         )
         
         ai_analysis = response.choices[0].message.content
