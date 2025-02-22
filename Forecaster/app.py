@@ -35,24 +35,29 @@ if uploaded_file:
         df = df.rename(columns={date_column: "ds", target_column: "y"})
         df["ds"] = pd.to_datetime(df["ds"])  # Ensure Date column is in datetime format
         
-        # Allow user to select forecast period
-        forecast_period = st.slider("Select Forecast Period (days)", min_value=7, max_value=365, value=30)
+        # Allow user to select forecast period in months
+        forecast_period_months = st.slider("Select Forecast Period (months)", min_value=1, max_value=24, value=12)
+        forecast_period_days = forecast_period_months * 30
         
         # Fit Prophet model
         model = Prophet()
         model.fit(df)
         
         # Forecast future data
-        future = model.make_future_dataframe(periods=forecast_period)
+        future = model.make_future_dataframe(periods=forecast_period_days)
         forecast = model.predict(future)
         
         # Display forecast
         st.write("### Forecasted Data")
         st.dataframe(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail())
         
-        # Plot forecast
+        # Plot actuals and forecast
         fig, ax = plt.subplots(figsize=(10, 6))
-        model.plot(forecast, ax=ax)
+        ax.plot(df["ds"], df["y"], label="Actuals", marker='o')
+        ax.plot(forecast["ds"], forecast["yhat"], label="Forecast", linestyle='dashed')
+        ax.fill_between(forecast["ds"], forecast["yhat_lower"], forecast["yhat_upper"], alpha=0.3)
+        ax.set_title("Actual vs Forecasted Data")
+        ax.legend()
         st.pyplot(fig)
         
         # Generate AI Commentary
@@ -73,7 +78,7 @@ if uploaded_file:
                 {"role": "system", "content": "You are an expert in financial forecasting."},
                 {"role": "user", "content": prompt}
             ],
-            model="llama-3.3-70b-versatile",
+            model="llama3-8b-8192",
         )
         
         ai_analysis = response.choices[0].message.content
